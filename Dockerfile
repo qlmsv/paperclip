@@ -56,4 +56,4 @@ VOLUME ["/paperclip"]
 EXPOSE 3100
 
 USER node
-CMD ["sh", "-c", "node /app/bootstrap.js; exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
+CMD ["sh", "-c", "node --import ./server/node_modules/tsx/dist/loader.mjs cli/src/index.ts auth bootstrap-ceo --dbUrl \"$DATABASE_URL\" --base-url \"$PAPERCLIP_PUBLIC_URL\" --force 2>&1 || true; exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
