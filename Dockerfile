@@ -56,4 +56,4 @@ VOLUME ["/paperclip"]
 EXPOSE 3100
 
 USER node
-CMD ["node", "--import", "./server/node_modules/tsx/dist/loader.mjs", "server/dist/index.js"]
+CMD ["sh", "-c", "node /app/bootstrap.js; exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
