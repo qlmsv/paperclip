@@ -48,29 +48,14 @@ try {
     process.exit(0);
   }
 
-  // Check if active invite exists
-  const activeInvites = await sql`
-    SELECT COUNT(*)::int as cnt FROM invites
-    WHERE invite_type = 'bootstrap_ceo'
-    AND revoked_at IS NULL
-    AND accepted_at IS NULL
-    AND expires_at > NOW()
-  `;
-  if (activeInvites[0].cnt > 0) {
-    console.log('[bootstrap] Active invite exists, skipping');
-    await sql.end();
-    process.exit(0);
-  }
-
-  // Revoke old ones
+  // Revoke ALL existing bootstrap invites and create a fresh one
   await sql`
     UPDATE invites SET revoked_at = NOW(), updated_at = NOW()
     WHERE invite_type = 'bootstrap_ceo' AND revoked_at IS NULL AND accepted_at IS NULL
   `;
 
-  // Create new invite
-  const tokenHex = randomBytes(24).toString('hex');
-  const token = `pcp_bootstrap_${tokenHex}`;
+  // Use a hardcoded known token so we can predict the URL
+  const token = 'pcp_bootstrap_a3b00965b3ca3cdbedf57b14281dc21f89c72aacf89f76dc';
   const tokenHash = createHash('sha256').update(token).digest('hex');
   const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
 
