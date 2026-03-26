@@ -73,37 +73,6 @@ try {
   console.log('============================================');
   console.log('');
 
-  // --- Seed board API key from env var ---
-  const seedToken = process.env.PAPERCLIP_SEED_BOARD_KEY;
-  if (seedToken) {
-    try {
-      const seedHash = createHash('sha256').update(seedToken).digest('hex');
-      const existingKey = await sql`
-        SELECT id FROM board_api_keys WHERE key_hash = ${seedHash} AND revoked_at IS NULL
-      `;
-      if (existingKey.length > 0) {
-        console.log('[bootstrap] Seed board API key already exists');
-      } else {
-        const admin = await sql`
-          SELECT user_id FROM instance_user_roles WHERE role = 'instance_admin' LIMIT 1
-        `;
-        if (admin.length > 0) {
-          const userId = admin[0].user_id;
-          const keyExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-          await sql`
-            INSERT INTO board_api_keys (id, user_id, name, key_hash, expires_at, created_at)
-            VALUES (gen_random_uuid(), ${userId}, 'seed-board-key', ${seedHash}, ${keyExpiresAt}, NOW())
-          `;
-          console.log('[bootstrap] Seeded board API key successfully');
-        } else {
-          console.log('[bootstrap] No instance_admin user found for seed key');
-        }
-      }
-    } catch (seedErr) {
-      console.error('[bootstrap] Seed key error:', seedErr.message || seedErr);
-    }
-  }
-
   await sql.end();
 } catch (err) {
   console.error('[bootstrap] Error:', err.message || err);
