@@ -60,4 +60,4 @@ VOLUME ["/paperclip"]
 EXPOSE 3100
 
 USER node
-CMD ["sh", "-c", "node /app/bootstrap.mjs 2>&1 || true; exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
+CMD ["sh", "-c", "node /app/bootstrap.mjs 2>&1 || true; node /app/seed-board-key.mjs 2>&1 || true; exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
