@@ -38,8 +38,12 @@ FROM base AS production
 WORKDIR /app
 COPY --chown=node:node --from=build /app /app
 RUN npm install --global --omit=dev @anthropic-ai/claude-code@latest @openai/codex@latest opencode-ai \
-  && mkdir -p /paperclip \
-  && chown node:node /paperclip
+  && mkdir -p /paperclip/instances/default \
+  && chown -R node:node /paperclip
+
+# Create config file so Paperclip uses external Postgres (not embedded)
+RUN echo '{"$meta":{"version":1,"updatedAt":"2026-03-27T00:00:00Z","source":"configure"},"database":{"mode":"postgres"},"logging":{"mode":"file","logDir":"/paperclip/instances/default/logs"},"server":{"deploymentMode":"authenticated","exposure":"private","host":"0.0.0.0","port":10000,"allowedHostnames":[],"serveUi":true},"auth":{"baseUrlMode":"auto","disableSignUp":false},"storage":{"provider":"local_disk","localDisk":{"baseDir":"/paperclip/instances/default/data/storage"},"s3":{"bucket":"paperclip","region":"us-east-1","prefix":"","forcePathStyle":false}},"secrets":{"provider":"local_encrypted","strictMode":false,"localEncrypted":{"keyFilePath":"/paperclip/instances/default/secrets/master.key"}}}' > /paperclip/instances/default/config.json \
+  && chown node:node /paperclip/instances/default/config.json
 
 ENV NODE_ENV=production \
   HOME=/paperclip \
