@@ -1,13 +1,12 @@
 /// <reference path="./types/express.d.ts" />
 import { existsSync, readFileSync, rmSync } from "node:fs";
-import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { pathToFileURL } from "node:url";
 import type { Request as ExpressRequest, RequestHandler } from "express";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   createDb,
   ensurePostgresDatabase,
@@ -18,7 +17,6 @@ import {
   formatDatabaseBackupResult,
   runDatabaseBackup,
   authUsers,
-  boardApiKeys,
   companies,
   companyMemberships,
   instanceUserRoles,
@@ -474,43 +472,6 @@ export async function startServer(): Promise<StartedServer> {
     resolveSession = (req) => resolveBetterAuthSession(auth, req);
     resolveSessionFromHeaders = (headers) => resolveBetterAuthSessionFromHeaders(auth, headers);
     await initializeBoardClaimChallenge(db as any, { deploymentMode: config.deploymentMode });
-
-    // --- One-time seed: create board API key from env var ---
-    const seedToken = process.env.PAPERCLIP_SEED_BOARD_KEY;
-    if (seedToken) {
-      try {
-        const seedHash = createHash("sha256").update(seedToken).digest("hex");
-        const existingKey = await (db as any)
-          .select({ id: boardApiKeys.id })
-          .from(boardApiKeys)
-          .where(and(eq(boardApiKeys.keyHash, seedHash), isNull(boardApiKeys.revokedAt)))
-          .then((rows: any[]) => rows[0] ?? null);
-        if (!existingKey) {
-          const adminUser = await (db as any)
-            .select({ id: instanceUserRoles.userId })
-            .from(instanceUserRoles)
-            .where(eq(instanceUserRoles.role, "instance_admin"))
-            .then((rows: any[]) => rows[0] ?? null);
-          if (adminUser) {
-            await (db as any).insert(boardApiKeys).values({
-              userId: adminUser.id,
-              name: "seed-board-key",
-              keyHash: seedHash,
-              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            });
-            logger.info("Seeded board API key from PAPERCLIP_SEED_BOARD_KEY env var");
-          } else {
-            logger.warn("PAPERCLIP_SEED_BOARD_KEY set but no instance_admin user found");
-          }
-        } else {
-          logger.info("Seed board API key already exists, skipping");
-        }
-      } catch (err) {
-        logger.error({ err }, "Failed to seed board API key");
-      }
-    }
-    // --- End seed ---
-
     authReady = true;
   }
   
