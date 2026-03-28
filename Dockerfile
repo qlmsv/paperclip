@@ -48,7 +48,7 @@ RUN echo '{"$meta":{"version":1,"updatedAt":"2026-03-27T00:00:00Z","source":"con
 ENV NODE_ENV=production \
   HOME=/paperclip \
   HOST=0.0.0.0 \
-  PORT=3100 \
+  PORT=10000 \
   SERVE_UI=true \
   PAPERCLIP_HOME=/paperclip \
   PAPERCLIP_INSTANCE_ID=default \
@@ -56,8 +56,7 @@ ENV NODE_ENV=production \
   PAPERCLIP_DEPLOYMENT_MODE=authenticated \
   PAPERCLIP_DEPLOYMENT_EXPOSURE=private
 
-VOLUME ["/paperclip"]
-EXPOSE 3100
+EXPOSE 10000
 
 USER node
 CMD ["sh", "-c", "node /app/bootstrap.mjs 2>&1 || true; exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
