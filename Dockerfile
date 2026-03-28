@@ -58,4 +58,4 @@ ENV NODE_ENV=production \
 EXPOSE 10000
 
 USER node
-CMD ["sh", "-c", "node /app/bootstrap.mjs 2>&1 || true; exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
+CMD ["sh", "-c", "node --import ./server/node_modules/tsx/dist/loader.mjs packages/db/src/migrate.ts && (node /app/bootstrap.mjs 2>&1 || true); exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
