@@ -37,8 +37,8 @@ RUN test -f server/dist/index.js || (echo "ERROR: server build output missing" &
 FROM base AS production
 WORKDIR /app
 COPY --chown=node:node --from=build /app /app
-RUN npm install -g @openai/codex@0.117.0 \
-  && codex --version \
+RUN printf '%s\n' '#!/bin/sh' 'exec npx -y @openai/codex@0.117.0 "$@"' > /usr/local/bin/codex \
+  && chmod +x /usr/local/bin/codex \
   && mkdir -p /paperclip/instances/default \
   && chown -R node:node /paperclip
 
