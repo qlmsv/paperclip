@@ -1,0 +1,103 @@
+name: Upstream Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: paperclip-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Prepare upstream sync branch
+        id: sync
+        env:
+          BASE_BRANCH: master
+          UPSTREAM_URL: https://github.com/paperclipai/paperclip.git
+          UPSTREAM_BRANCH: master
+          RISKY_REGEX: (^|/)(packages/db/|migrations?/|schema\.prisma$|bootstrap\.mjs$|Dockerfile$|docker-compose|server/.*migrat|server/.*auth|packages/shared/src/auth/)
+        run: |
+          set -euo pipefail
+
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream "$UPSTREAM_URL"
+          git fetch origin "$BASE_BRANCH"
+          git fetch upstream "$UPSTREAM_BRANCH"
+
+          UPDATE_BRANCH="automation/upstream-sync"
+          git checkout -B "$UPDATE_BRANCH" "origin/$BASE_BRANCH"
+
+          if ! git merge --no-edit -X ours "upstream/$UPSTREAM_BRANCH"; then
+            git merge --abort || true
+            echo "merge_failed=true" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          if git diff --quiet "origin/$BASE_BRANCH"...HEAD; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          changed_files="$(git diff --name-only "origin/$BASE_BRANCH"...HEAD)"
+          risky_changes=false
+          if printf '%s\n' "$changed_files" | grep -Eq "$RISKY_REGEX"; then
+            risky_changes=true
+          fi
+
+          {
+            echo "has_changes=true"
+            echo "risky_changes=$risky_changes"
+            echo "changed_files<<EOF"
+            printf '%s\n' "$changed_files"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create update PR
+        if: steps.sync.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/upstream-sync
+          base: master
+          delete-branch: true
+          title: "chore: sync paperclip with upstream"
+          commit-message: "chore: sync paperclip with upstream"
+          labels: |
+            automated
+            upstream-sync
+          body: |
+            ## Summary
+
+            Automatic upstream sync from `paperclipai/paperclip@master`.
+
+            Risky changes detected: `${{ steps.sync.outputs.risky_changes }}`
+
+            Risky means files related to database, migrations, auth, or container/runtime changed and should be reviewed before merge.
+
+            ## Changed files
+
+            ```
+            ${{ steps.sync.outputs.changed_files }}
+            ```
+
+            ## Deployment policy
+
+            Merge of this PR will deploy via Render auto-deploy.
+            If risky changes are `true`, review carefully before merging.
