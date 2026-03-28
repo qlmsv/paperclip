@@ -35,45 +35,66 @@ if (!dbUrl) {
   process.exit(0);
 }
 
-const baseUrl = (process.env.PAPERCLIP_PUBLIC_URL || 'https://paperclip-7lyg.onrender.com').replace(/\/+$/, '');
+function hashToken(token) {
+  return createHash('sha256').update(token).digest('hex');
+}
 
+function createInviteToken() {
+  return `pcp_bootstrap_${randomBytes(24).toString('hex')}`;
+}
+
+const baseUrl = (
+  process.env.PAPERCLIP_PUBLIC_URL ||
+  process.env.PAPERCLIP_AUTH_PUBLIC_BASE_URL ||
+  process.env.BETTER_AUTH_URL ||
+  process.env.BETTER_AUTH_BASE_URL ||
+  'https://os.kai-it.pro'
+).replace(/\/+$/, '');
+
+let sql;
+let exitCode = 0;
 try {
-  const sql = postgres(dbUrl, { max: 1 });
+  sql = postgres(dbUrl, { max: 1 });
 
   // Check if admin already exists
   const admins = await sql`SELECT COUNT(*)::int as cnt FROM instance_user_roles WHERE role = 'instance_admin'`;
   if (admins[0].cnt > 0) {
     console.log('[bootstrap] Admin already exists, skipping');
-    await sql.end();
-    process.exit(0);
+  } else {
+    // Match Paperclip's normal bootstrap flow: revoke any active invite and mint a new one.
+    await sql`
+      UPDATE invites SET revoked_at = NOW(), updated_at = NOW()
+      WHERE invite_type = 'bootstrap_ceo'
+        AND revoked_at IS NULL
+        AND accepted_at IS NULL
+        AND expires_at > NOW()
+    `;
+
+    const token = createInviteToken();
+    const tokenHash = hashToken(token);
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
+
+    await sql`
+      INSERT INTO invites (id, invite_type, token_hash, allowed_join_types, expires_at, invited_by_user_id, created_at, updated_at)
+      VALUES (gen_random_uuid(), 'bootstrap_ceo', ${tokenHash}, 'human', ${expiresAt}, 'system', NOW(), NOW())
+    `;
+
+    const inviteUrl = `${baseUrl}/invite/${token}`;
+    console.log('');
+    console.log('============================================');
+    console.log('  BOOTSTRAP CEO INVITE CREATED');
+    console.log('  URL: ' + inviteUrl);
+    console.log('  Expires: ' + expiresAt.toISOString());
+    console.log('============================================');
+    console.log('');
   }
 
-  // Revoke ALL existing bootstrap invites and create a fresh one
-  await sql`
-    UPDATE invites SET revoked_at = NOW(), updated_at = NOW()
-    WHERE invite_type = 'bootstrap_ceo' AND revoked_at IS NULL AND accepted_at IS NULL
-  `;
-
-  // Use a hardcoded known token so we can predict the URL
-  const token = 'pcp_bootstrap_a3b00965b3ca3cdbedf57b14281dc21f89c72aacf89f76dc';
-  const tokenHash = createHash('sha256').update(token).digest('hex');
-  const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
-
-  await sql`
-    INSERT INTO invites (id, invite_type, token_hash, allowed_join_types, expires_at, invited_by_user_id, created_at, updated_at)
-    VALUES (gen_random_uuid(), 'bootstrap_ceo', ${tokenHash}, 'human', ${expiresAt}, 'system', NOW(), NOW())
-  `;
-
-  const inviteUrl = `${baseUrl}/invite/${token}`;
-  console.log('');
-  console.log('============================================');
-  console.log('  BOOTSTRAP CEO INVITE CREATED');
-  console.log('  URL: ' + inviteUrl);
-  console.log('  Expires: ' + expiresAt.toISOString());
-  console.log('============================================');
-  console.log('');
-
-  await sql.end();
 } catch (err) {
   console.error('[bootstrap] Error:', err.message || err);
+  exitCode = 1;
+} finally {
+  await sql?.end?.({ timeout: 5 }).catch(async () => {
+    await sql?.end?.().catch(() => undefined);
+  });
+  process.exit(exitCode);
 }
