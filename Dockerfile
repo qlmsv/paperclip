@@ -57,6 +57,13 @@ ENV NODE_ENV=production \
   PAPERCLIP_DEPLOYMENT_MODE=authenticated \
   PAPERCLIP_DEPLOYMENT_EXPOSURE=private
 
+RUN printf '%s\n' '#!/bin/sh' 'exec npx -y @openai/codex@0.117.0 "$@"' > /usr/local/bin/codex \
+  && chmod +x /usr/local/bin/codex \
+  && printf '%s\n' '#!/bin/sh' 'exec npx -y opencode-ai@latest "$@"' > /usr/local/bin/opencode \
+  && chmod +x /usr/local/bin/opencode \
+  && mkdir -p /paperclip/instances/default \
+  && chown -R node:node /paperclip
+
 EXPOSE 10000
 
 USER node
