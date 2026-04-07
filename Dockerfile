@@ -37,9 +37,29 @@ RUN test -f server/dist/index.js || (echo "ERROR: server build output missing" &
 FROM base AS production
 WORKDIR /app
 COPY --chown=node:node --from=build /app /app
-RUN printf '%s\n' '#!/bin/sh' 'exec npx -y @openai/codex@0.117.0 "$@"' > /usr/local/bin/codex \
+RUN npm install --global --omit=dev @anthropic-ai/claude-code@2.1.92 \
+  && CLAUDE_BIN="$(command -v claude)" \
+  && mv "$CLAUDE_BIN" /usr/local/bin/claude-real \
+  && printf '%s\n' \
+    '#!/bin/sh' \
+    'if [ -n "${MINIMAX_API_KEY:-}" ]; then' \
+    '  unset ANTHROPIC_API_KEY' \
+    '  export ANTHROPIC_BASE_URL="${MINIMAX_BASE_URL:-https://api.minimax.io/anthropic}"' \
+    '  export ANTHROPIC_AUTH_TOKEN="${MINIMAX_API_KEY}"' \
+    '  export API_TIMEOUT_MS="${API_TIMEOUT_MS:-3000000}"' \
+    '  export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="${CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC:-1}"' \
+    '  export ANTHROPIC_MODEL="${ANTHROPIC_MODEL:-${MINIMAX_MODEL:-MiniMax-M2.7}}"' \
+    '  export ANTHROPIC_SMALL_FAST_MODEL="${ANTHROPIC_SMALL_FAST_MODEL:-${MINIMAX_MODEL:-MiniMax-M2.7}}"' \
+    '  export ANTHROPIC_DEFAULT_SONNET_MODEL="${ANTHROPIC_DEFAULT_SONNET_MODEL:-${MINIMAX_MODEL:-MiniMax-M2.7}}"' \
+    '  export ANTHROPIC_DEFAULT_OPUS_MODEL="${ANTHROPIC_DEFAULT_OPUS_MODEL:-${MINIMAX_MODEL:-MiniMax-M2.7}}"' \
+    '  export ANTHROPIC_DEFAULT_HAIKU_MODEL="${ANTHROPIC_DEFAULT_HAIKU_MODEL:-${MINIMAX_MODEL:-MiniMax-M2.7}}"' \
+    'fi' \
+    'exec /usr/local/bin/claude-real "$@"' > /usr/local/bin/claude \
+  && chmod +x /usr/local/bin/claude \
+  && ln -sf /usr/local/bin/claude /usr/local/bin/claude-minimax \
+  && printf '%s\n' '#!/bin/sh' 'exec npx -y @openai/codex@0.117.0 "$@"' > /usr/local/bin/codex \
   && chmod +x /usr/local/bin/codex \
-  && mkdir -p /paperclip/instances/default \
+  && mkdir -p /paperclip/instances/default /paperclip/.claude \
   && chown -R node:node /paperclip
 
 # Create config file so Paperclip uses external Postgres (not embedded)
@@ -48,6 +68,7 @@ RUN echo '{"$meta":{"version":1,"updatedAt":"2026-03-27T00:00:00Z","source":"con
 
 ENV NODE_ENV=production \
   HOME=/paperclip \
+  CLAUDE_HOME=/paperclip/.claude \
   HOST=0.0.0.0 \
   PORT=10000 \
   SERVE_UI=true \
