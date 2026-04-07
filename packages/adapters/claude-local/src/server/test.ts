@@ -27,6 +27,14 @@ function isNonEmpty(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function resolveEnvValue(env: Record<string, string>, key: string): string {
+  const configValue = env[key];
+  if (isNonEmpty(configValue)) return configValue.trim();
+  const hostValue = process.env[key];
+  if (isNonEmpty(hostValue)) return hostValue.trim();
+  return "";
+}
+
 function firstNonEmptyLine(text: string): string {
   return (
     text
@@ -95,10 +103,19 @@ export async function testEnvironment(
     });
   }
 
-  const configApiKey = env.ANTHROPIC_API_KEY;
-  const hostApiKey = process.env.ANTHROPIC_API_KEY;
-  if (isNonEmpty(configApiKey) || isNonEmpty(hostApiKey)) {
-    const source = isNonEmpty(configApiKey) ? "adapter config env" : "server environment";
+  const anthropicApiKey = resolveEnvValue(env, "ANTHROPIC_API_KEY");
+  const anthropicAuthToken = resolveEnvValue(env, "ANTHROPIC_AUTH_TOKEN");
+  const minimaxApiKey = resolveEnvValue(env, "MINIMAX_API_KEY");
+  const anthropicBaseUrl = resolveEnvValue(env, "ANTHROPIC_BASE_URL");
+  const minimaxBaseUrl = resolveEnvValue(env, "MINIMAX_BASE_URL");
+  const gatewayBaseUrl = anthropicBaseUrl || minimaxBaseUrl;
+  const usesGateway =
+    isNonEmpty(minimaxApiKey) ||
+    isNonEmpty(anthropicAuthToken) ||
+    /minimax/i.test(gatewayBaseUrl);
+
+  if (isNonEmpty(anthropicApiKey)) {
+    const source = isNonEmpty(env.ANTHROPIC_API_KEY) ? "adapter config env" : "server environment";
     checks.push({
       code: "claude_anthropic_api_key_overrides_subscription",
       level: "warn",
@@ -106,6 +123,20 @@ export async function testEnvironment(
         "ANTHROPIC_API_KEY is set. Claude will use API-key auth instead of subscription credentials.",
       detail: `Detected in ${source}.`,
       hint: "Unset ANTHROPIC_API_KEY if you want subscription-based Claude login behavior.",
+    });
+  } else if (usesGateway) {
+    checks.push({
+      code: "claude_gateway_auth_configured",
+      level: isNonEmpty(minimaxApiKey) || isNonEmpty(anthropicAuthToken) ? "info" : "warn",
+      message:
+        isNonEmpty(minimaxApiKey) || isNonEmpty(anthropicAuthToken)
+          ? "Anthropic-compatible gateway auth is configured."
+          : "Anthropic-compatible gateway base URL is configured, but no auth token was detected.",
+      ...(gatewayBaseUrl ? { detail: `Base URL: ${gatewayBaseUrl}` } : {}),
+      hint:
+        isNonEmpty(minimaxApiKey) || isNonEmpty(anthropicAuthToken)
+          ? "Claude will use the configured gateway for API-key auth."
+          : "Set MINIMAX_API_KEY or ANTHROPIC_AUTH_TOKEN so Claude can authenticate against the gateway.",
     });
   } else {
     checks.push({

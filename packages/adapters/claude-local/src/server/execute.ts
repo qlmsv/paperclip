@@ -98,8 +98,13 @@ function hasNonEmptyEnvValue(env: Record<string, string>, key: string): boolean 
 }
 
 function resolveClaudeBillingType(env: Record<string, string>): "api" | "subscription" {
-  // Claude uses API-key auth when ANTHROPIC_API_KEY is present; otherwise rely on local login/session auth.
-  return hasNonEmptyEnvValue(env, "ANTHROPIC_API_KEY") ? "api" : "subscription";
+  // Claude uses API-key auth when any Anthropic-compatible gateway token is present;
+  // otherwise rely on local login/session auth.
+  return hasNonEmptyEnvValue(env, "ANTHROPIC_API_KEY") ||
+    hasNonEmptyEnvValue(env, "ANTHROPIC_AUTH_TOKEN") ||
+    hasNonEmptyEnvValue(env, "MINIMAX_API_KEY")
+    ? "api"
+    : "subscription";
 }
 
 async function buildClaudeRuntimeConfig(input: ClaudeExecutionInput): Promise<ClaudeRuntimeConfig> {

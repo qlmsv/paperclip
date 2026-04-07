@@ -34,4 +34,8 @@ Operational fields:
 
 Notes:
 - When Paperclip realizes a workspace/runtime for a run, it injects PAPERCLIP_WORKSPACE_* and PAPERCLIP_RUNTIME_* env vars for agent-side tooling.
+- Anthropic-compatible gateways such as MiniMax can be configured via env, for example:
+  - MINIMAX_API_KEY=...
+  - MINIMAX_BASE_URL=https://api.minimax.io/anthropic
+  - MINIMAX_MODEL=MiniMax-M2.7
 `;
