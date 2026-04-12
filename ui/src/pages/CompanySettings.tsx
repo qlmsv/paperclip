@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Link } from "@/lib/router";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DEFAULT_FEEDBACK_DATA_SHARING_TERMS_VERSION } from "@paperclipai/shared";
 import { useCompany } from "../context/CompanyContext";
@@ -10,7 +11,7 @@ import { accessApi } from "../api/access";
 import { assetsApi } from "../api/assets";
 import { queryKeys } from "../lib/queryKeys";
 import { Button } from "@/components/ui/button";
-import { Settings, Check, Download, Upload } from "lucide-react";
+import { Settings, Check, Download, Upload, Globe } from "lucide-react";
 import { CompanyPatternIcon } from "../components/CompanyPatternIcon";
 import {
   Field,
@@ -27,6 +28,7 @@ type AgentSnippetInput = {
 const FEEDBACK_TERMS_URL = import.meta.env.VITE_FEEDBACK_TERMS_URL?.trim() || "https://paperclip.ing/tos";
 
 export function CompanySettings() {
+  const { t, i18n } = useTranslation();
   const {
     companies,
     selectedCompany,
@@ -92,13 +94,13 @@ export function CompanySettings() {
     onSuccess: (_company, enabled) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
       pushToast({
-        title: enabled ? "Feedback sharing enabled" : "Feedback sharing disabled",
+        title: enabled ? t("settings.feedbackEnabled") : t("settings.feedbackDisabled"),
         tone: "success",
       });
     },
     onError: (err) => {
       pushToast({
-        title: "Failed to update feedback sharing",
+        title: t("settings.feedbackFailed"),
         body: err instanceof Error ? err.message : "Unknown error",
         tone: "error",
       });
@@ -224,15 +226,15 @@ export function CompanySettings() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
-      { label: "Settings" }
+      { label: selectedCompany?.name ?? t("sidebar.company"), href: "/dashboard" },
+      { label: t("nav.settings") }
     ]);
   }, [setBreadcrumbs, selectedCompany?.name]);
 
   if (!selectedCompany) {
     return (
       <div className="text-sm text-muted-foreground">
-        No company selected. Select a company from the switcher above.
+        {t("settings.noCompany")}
       </div>
     );
   }
@@ -559,6 +561,35 @@ export function CompanySettings() {
                 <Upload className="mr-1.5 h-3.5 w-3.5" />
                 Import
               </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Language */}
+      <div className="space-y-4">
+        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {t("settings.language")}
+        </div>
+        <div className="space-y-3 rounded-md border border-border px-4 py-4">
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">{t("settings.languageDesc")}</span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={i18n.language === "en" ? "default" : "outline"}
+              onClick={() => i18n.changeLanguage("en")}
+            >
+              {t("settings.english")}
+            </Button>
+            <Button
+              size="sm"
+              variant={i18n.language === "ru" ? "default" : "outline"}
+              onClick={() => i18n.changeLanguage("ru")}
+            >
+              {t("settings.russian")}
             </Button>
           </div>
         </div>
