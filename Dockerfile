@@ -60,8 +60,9 @@ ARG USER_UID=1000
 ARG USER_GID=1000
 WORKDIR /app
 COPY --chown=node:node --from=build /app /app
-RUN npm install --global --omit=dev @anthropic-ai/claude-code@2.1.92 \
-  && CLAUDE_BIN="$(command -v claude)" \
+RUN npm install --global --omit=dev @anthropic-ai/claude-code@2.1.92
+
+RUN CLAUDE_BIN="$(command -v claude)" \
   && mv "$CLAUDE_BIN" /usr/local/bin/claude-real \
   && printf '%s\n' \
     '#!/bin/sh' \
