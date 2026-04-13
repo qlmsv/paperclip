@@ -1,6 +1,7 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "@/lib/router";
+import { useTranslation } from "react-i18next";
 import { Check, ChevronDown, ChevronRight, Layers, MoreHorizontal, Plus, Repeat } from "lucide-react";
 import { routinesApi } from "../api/routines";
 import { agentsApi } from "../api/agents";
@@ -288,6 +289,7 @@ function RoutineListRow({
 }
 
 export function Routines() {
+  const { t } = useTranslation();
   const { selectedCompanyId } = useCompany();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
@@ -555,7 +557,7 @@ export function Routines() {
   }
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Repeat} message="Select a company to view routines." />;
+    return <EmptyState icon={Repeat} message={t("routines.selectCompany")} />;
   }
 
   if (isLoading) {
@@ -678,7 +680,7 @@ export function Routines() {
               <textarea
                 ref={titleInputRef}
                 className="w-full resize-none overflow-hidden bg-transparent text-xl font-semibold outline-none placeholder:text-muted-foreground/50"
-                placeholder="Routine title"
+                placeholder={t("routines.routineTitle")}
                 rows={1}
                 value={draft.title}
                 onChange={(event) => {
@@ -716,9 +718,9 @@ export function Routines() {
                     ref={assigneeSelectorRef}
                     value={draft.assigneeAgentId}
                     options={assigneeOptions}
-                    placeholder="Assignee"
+                    placeholder={t("routines.assignee")}
                     noneLabel="No assignee"
-                    searchPlaceholder="Search assignees..."
+                    searchPlaceholder={t("routines.searchAssignees")}
                     emptyMessage="No assignees found."
                     onChange={(assigneeAgentId) => {
                       if (assigneeAgentId) trackRecentAssignee(assigneeAgentId);
@@ -761,9 +763,9 @@ export function Routines() {
                     ref={projectSelectorRef}
                     value={draft.projectId}
                     options={projectOptions}
-                    placeholder="Project"
+                    placeholder={t("routines.project")}
                     noneLabel="No project"
-                    searchPlaceholder="Search projects..."
+                    searchPlaceholder={t("routines.searchProjects")}
                     emptyMessage="No projects found."
                     onChange={(projectId) => setDraft((current) => ({ ...current, projectId }))}
                     onConfirm={() => descriptionEditorRef.current?.focus()}
@@ -803,7 +805,7 @@ export function Routines() {
                 ref={descriptionEditorRef}
                 value={draft.description}
                 onChange={(description) => setDraft((current) => ({ ...current, description }))}
-                placeholder="Add instructions..."
+                placeholder={t("routines.addInstructions")}
                 bordered={false}
                 contentClassName="min-h-[160px] text-sm text-muted-foreground"
                 onSubmit={() => {
@@ -887,7 +889,7 @@ export function Routines() {
                 }
               >
                 <Plus className="mr-2 h-4 w-4" />
-                {createRoutine.isPending ? "Creating..." : "Create routine"}
+                {createRoutine.isPending ? t("common.creating") : t("routines.createRoutine")}
               </Button>
               {createRoutine.isError ? (
                 <p className="text-sm text-destructive">
@@ -913,7 +915,7 @@ export function Routines() {
             <div className="py-12">
               <EmptyState
                 icon={Repeat}
-                message="No routines yet. Use Create routine to define the first recurring workflow."
+                message={t("routines.noRoutines")}
               />
             </div>
           ) : (

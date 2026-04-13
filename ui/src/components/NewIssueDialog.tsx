@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { pickTextColorForSolidBg } from "@/lib/color-contrast";
 import { useDialog } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
@@ -277,6 +278,7 @@ function issueExecutionWorkspaceModeForExistingWorkspace(mode: string | null | u
 }
 
 export function NewIssueDialog() {
+  const { t } = useTranslation();
   const { newIssueOpen, newIssueDefaults, closeNewIssue } = useDialog();
   const { companies, selectedCompanyId, selectedCompany } = useCompany();
   const queryClient = useQueryClient();
@@ -1061,7 +1063,7 @@ export function NewIssueDialog() {
           <div className="px-4 pt-4 pb-2">
             <textarea
             className="w-full text-lg font-semibold bg-transparent outline-none resize-none overflow-hidden placeholder:text-muted-foreground/50"
-            placeholder="Issue title"
+            placeholder={t("issues.issueTitle")}
             rows={1}
             value={title}
             onChange={(e) => {
@@ -1106,7 +1108,7 @@ export function NewIssueDialog() {
                 ref={assigneeSelectorRef}
                 value={assigneeValue}
                 options={assigneeOptions}
-                placeholder="Assignee"
+                placeholder={t("issues.assignee")}
                 disablePortal
                 noneLabel="No assignee"
                 searchPlaceholder="Search assignees..."
@@ -1157,7 +1159,7 @@ export function NewIssueDialog() {
                 ref={projectSelectorRef}
                 value={projectId}
                 options={projectOptions}
-                placeholder="Project"
+                placeholder={t("issueProperties.project")}
                 disablePortal
                 noneLabel="No project"
                 searchPlaceholder="Search projects..."
@@ -1200,7 +1202,7 @@ export function NewIssueDialog() {
                   <button
                     type="button"
                     className="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-accent/50 transition-colors"
-                    title="Add reviewer or approver"
+                    title={t("issues.addReviewerOrApprover")}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
@@ -1246,7 +1248,7 @@ export function NewIssueDialog() {
                 <InlineEntitySelector
                 value={reviewerValue}
                 options={assigneeOptions}
-                placeholder="Reviewer"
+                placeholder={t("issues.reviewer")}
                 disablePortal
                 noneLabel="No reviewer"
                 searchPlaceholder="Search reviewers..."
@@ -1290,7 +1292,7 @@ export function NewIssueDialog() {
                 <InlineEntitySelector
                 value={approverValue}
                 options={assigneeOptions}
-                placeholder="Approver"
+                placeholder={t("issues.approver")}
                 disablePortal
                 noneLabel="No approver"
                 searchPlaceholder="Search approvers..."
@@ -1412,10 +1414,10 @@ export function NewIssueDialog() {
                   <InlineEntitySelector
                     value={assigneeModelOverride}
                     options={modelOverrideOptions}
-                    placeholder="Default model"
+                    placeholder={t("issues.defaultModel")}
                     disablePortal
-                    noneLabel="Default model"
-                    searchPlaceholder="Search models..."
+                    noneLabel={t("issues.defaultModel")}
+                    searchPlaceholder={t("onboarding.searchModels")}
                     emptyMessage="No models found."
                     onChange={setAssigneeModelOverride}
                   />
@@ -1469,7 +1471,7 @@ export function NewIssueDialog() {
                 ref={descriptionEditorRef}
                 value={description}
                 onChange={setDescription}
-                placeholder="Add description..."
+                placeholder={t("issues.addDescription")}
                 bordered={false}
                 mentions={mentionOptions}
                 contentClassName={cn("text-sm text-muted-foreground pb-12", expanded ? "min-h-[220px]" : "min-h-[120px]")}
@@ -1507,7 +1509,7 @@ export function NewIssueDialog() {
                           className="shrink-0 text-muted-foreground"
                           onClick={() => removeStagedFile(file.id)}
                           disabled={createIssue.isPending}
-                          title="Remove document"
+                          title={t("issues.removeDocument")}
                         >
                           <X className="h-3.5 w-3.5" />
                         </Button>
@@ -1538,7 +1540,7 @@ export function NewIssueDialog() {
                           className="shrink-0 text-muted-foreground"
                           onClick={() => removeStagedFile(file.id)}
                           disabled={createIssue.isPending}
-                          title="Remove attachment"
+                          title={t("issues.removeAttachment")}
                         >
                           <X className="h-3.5 w-3.5" />
                         </Button>
