@@ -104,6 +104,14 @@ export async function testEnvironment(
     });
   }
 
+  const hasBedrock =
+    env.CLAUDE_CODE_USE_BEDROCK === "1" ||
+    env.CLAUDE_CODE_USE_BEDROCK === "true" ||
+    process.env.CLAUDE_CODE_USE_BEDROCK === "1" ||
+    process.env.CLAUDE_CODE_USE_BEDROCK === "true" ||
+    isNonEmpty(env.ANTHROPIC_BEDROCK_BASE_URL) ||
+    isNonEmpty(process.env.ANTHROPIC_BEDROCK_BASE_URL);
+
   const anthropicApiKey = resolveEnvValue(env, "ANTHROPIC_API_KEY");
   const anthropicAuthToken = resolveEnvValue(env, "ANTHROPIC_AUTH_TOKEN");
   const minimaxApiKey = resolveEnvValue(env, "MINIMAX_API_KEY");
