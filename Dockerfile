@@ -118,4 +118,8 @@ RUN printf '%s\n' '#!/bin/sh' 'exec npx -y @openai/codex@0.117.0 "$@"' > /usr/lo
 EXPOSE 10000
 
 USER node
+# Reset ENTRYPOINT inherited from node:lts base image, which points to
+# a docker-entrypoint.sh that calls `gosu node` — that fails on Render
+# because the container is not started as root.
+ENTRYPOINT []
 CMD ["sh", "-c", "node --import ./server/node_modules/tsx/dist/loader.mjs packages/db/src/migrate.ts && (node /app/bootstrap.mjs 2>&1 || true); exec node --import ./server/node_modules/tsx/dist/loader.mjs server/dist/index.js"]
