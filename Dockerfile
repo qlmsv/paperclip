@@ -2,7 +2,7 @@ FROM node:lts-trixie-slim AS base
 ARG USER_UID=1000
 ARG USER_GID=1000
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates gosu curl git wget ripgrep python3 \
+  && apt-get install -y --no-install-recommends ca-certificates gosu curl git wget ripgrep python3 python3-pip python3-venv \
   && rm -rf /var/lib/apt/lists/* \
   && corepack enable \
   && mkdir -p -m 755 /etc/apt/keyrings /etc/apt/sources.list.d \
@@ -114,6 +114,14 @@ RUN printf '%s\n' '#!/bin/sh' 'exec npx -y @openai/codex@0.117.0 "$@"' > /usr/lo
   && chmod +x /usr/local/bin/opencode \
   && mkdir -p /paperclip/instances/default \
   && chown -R node:node /paperclip
+
+# Install Hermes Agent (qlmsv fork) into a system-wide venv so the
+# hermes CLI is available for hermes-paperclip-adapter.
+RUN python3 -m venv /opt/hermes \
+  && /opt/hermes/bin/pip install --no-cache-dir --upgrade pip \
+  && /opt/hermes/bin/pip install --no-cache-dir "git+https://github.com/qlmsv/hermes-agent.git" \
+  && ln -sf /opt/hermes/bin/hermes /usr/local/bin/hermes \
+  && chown -R node:node /opt/hermes
 
 EXPOSE 10000
 
