@@ -132,6 +132,20 @@
     "addDescription": "Добавить описание...",
     "createIssue": "Создать задачу",
     "createButton": "Создать задачу",
+    "createSubIssueTitle": "Создать подзадачу",
+    "newSubIssue": "Новая подзадача",
+    "markAsRead": "Отметить как прочитанное",
+    "dismiss": "Скрыть",
+    "comment": "Комментировать",
+    "posting": "Отправка...",
+    "reply": "Ответить",
+    "failedToDeleteDocument": "Не удалось удалить документ",
+    "failedToRestoreDocument": "Не удалось восстановить версию документа",
+    "failedToSaveDocument": "Не удалось сохранить документ",
+    "addShortNote": "Добавить короткую заметку",
+    "addComment": "Добавить комментарий...",
+    "replyPlaceholder": "Ответить",
+    "addMoreDetail": "Опишите подробнее, что должен сделать агент...",
     "failedToCreate": "Не удалось создать задачу",
     "assignee": "Исполнитель",
     "addReviewer": "Добавить ревьюера",
@@ -256,7 +270,21 @@
     "noAgentsMatch": "Нет агентов, соответствующих выбранному фильтру.",
     "noHierarchy": "Организационная иерархия не определена.",
     "agentName": "Имя агента",
-    "title2": "Должность (например, VP Engineering)"
+    "title2": "Должность (например, VP Engineering)",
+    "failedToCreate": "Не удалось создать агента"
+  },
+  "onboardingErrors": {
+    "failedToCreateCompany": "Не удалось создать компанию",
+    "failedToLoadOpenCode": "Не удалось загрузить модели OpenCode.",
+    "failedToCreateAgent": "Не удалось создать агента",
+    "failedToUnsetAndRetry": "Не удалось сбросить ANTHROPIC_API_KEY и повторить.",
+    "failedToCreateTask": "Не удалось создать задачу"
+  },
+  "project": {
+    "archive": "Архивировать",
+    "unarchive": "Разархивировать",
+    "archiveHint": "Архивировать этот проект, чтобы скрыть из боковой панели и селекторов.",
+    "unarchiveHint": "Разархивировать этот проект, чтобы восстановить в боковой панели и селекторах."
   },
   "projects": {
     "title": "Проекты",

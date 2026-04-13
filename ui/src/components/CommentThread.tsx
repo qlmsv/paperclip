@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type {
   Agent,
   Approval,
@@ -662,6 +663,7 @@ export function CommentThread({
   interruptingQueuedRunId = null,
   composerDisabledReason = null,
 }: CommentThreadProps) {
+  const { t } = useTranslation();
   const [body, setBody] = useState("");
   const [reopen, setReopen] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -983,7 +985,7 @@ export function CommentThread({
               />
             )}
             <Button size="sm" disabled={!canSubmit} onClick={handleSubmit}>
-              {submitting ? "Posting..." : "Comment"}
+              {submitting ? t("issues.posting") : t("issues.comment")}
             </Button>
           </div>
         </div>

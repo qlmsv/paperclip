@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "@/lib/router";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Project } from "@paperclipai/shared";
 import { StatusBadge } from "./StatusBadge";
@@ -163,16 +164,17 @@ function ArchiveDangerZone({
   onArchive: (archived: boolean) => void;
   archivePending?: boolean;
 }) {
+  const { t } = useTranslation();
   const [confirming, setConfirming] = useState(false);
   const isArchive = !project.archivedAt;
-  const action = isArchive ? "Archive" : "Unarchive";
+  const action = isArchive ? t("project.archive") : t("project.unarchive");
 
   return (
     <div className="space-y-3 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-4">
       <p className="text-sm text-muted-foreground">
         {isArchive
-          ? "Archive this project to hide it from the sidebar and project selectors."
-          : "Unarchive this project to restore it in the sidebar and project selectors."}
+          ? t("project.archiveHint")
+          : t("project.unarchiveHint")}
       </p>
       {archivePending ? (
         <Button size="sm" variant="destructive" disabled>

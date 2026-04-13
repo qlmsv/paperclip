@@ -1034,7 +1034,7 @@ export function NewIssueDialog() {
               </PopoverContent>
             </Popover>
             <span className="text-muted-foreground/60">&rsaquo;</span>
-            <span>{isSubIssueMode ? "New sub-issue" : "New issue"}</span>
+            <span>{isSubIssueMode ? t("issues.newSubIssue") : t("issues.newIssue")}</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
@@ -1689,7 +1689,7 @@ export function NewIssueDialog() {
             >
               <span className="inline-flex items-center justify-center gap-1.5">
                 {createIssue.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                <span>{createIssue.isPending ? "Creating..." : isSubIssueMode ? "Create Sub-Issue" : "Create Issue"}</span>
+                <span>{createIssue.isPending ? t("common.creating") : isSubIssueMode ? t("issues.createSubIssueTitle") : t("issues.createButton")}</span>
               </span>
             </Button>
           </div>

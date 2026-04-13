@@ -409,7 +409,7 @@ export function OnboardingWizard() {
 
       setStep(2);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create company");
+      setError(err instanceof Error ? err.message : t("onboardingErrors.failedToCreateCompany"));
     } finally {
       setLoading(false);
     }
@@ -432,7 +432,7 @@ export function OnboardingWizard() {
           setError(
             adapterModelsError instanceof Error
               ? adapterModelsError.message
-              : "Failed to load OpenCode models."
+              : t("onboardingErrors.failedToLoadOpenCode")
           );
           return;
         }
@@ -471,7 +471,7 @@ export function OnboardingWizard() {
       });
       setStep(3);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create agent");
+      setError(err instanceof Error ? err.message : t("onboardingErrors.failedToCreateAgent"));
     } finally {
       setLoading(false);
     }
@@ -519,7 +519,7 @@ export function OnboardingWizard() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to unset ANTHROPIC_API_KEY and retry."
+          : t("onboardingErrors.failedToUnsetAndRetry")
       );
     } finally {
       setUnsetAnthropicLoading(false);
@@ -585,7 +585,7 @@ export function OnboardingWizard() {
           : `/issues/${issueRef}`
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create task");
+      setError(err instanceof Error ? err.message : t("onboardingErrors.failedToCreateTask"));
     } finally {
       setLoading(false);
     }

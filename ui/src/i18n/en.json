@@ -132,6 +132,20 @@
     "addDescription": "Add description...",
     "createIssue": "Create issue",
     "createButton": "Create Issue",
+    "createSubIssueTitle": "Create Sub-Issue",
+    "newSubIssue": "New sub-issue",
+    "markAsRead": "Mark as read",
+    "dismiss": "Dismiss",
+    "comment": "Comment",
+    "posting": "Posting...",
+    "reply": "Reply",
+    "failedToDeleteDocument": "Failed to delete document",
+    "failedToRestoreDocument": "Failed to restore document revision",
+    "failedToSaveDocument": "Failed to save document",
+    "addShortNote": "Add a short note",
+    "addComment": "Add a comment...",
+    "replyPlaceholder": "Reply",
+    "addMoreDetail": "Add more detail about what the agent should do...",
     "failedToCreate": "Failed to create issue",
     "assignee": "Assignee",
     "addReviewer": "Add reviewer",
@@ -256,7 +270,21 @@
     "noAgentsMatch": "No agents match the selected filter.",
     "noHierarchy": "No organizational hierarchy defined.",
     "agentName": "Agent name",
-    "title2": "Title (e.g. VP of Engineering)"
+    "title2": "Title (e.g. VP of Engineering)",
+    "failedToCreate": "Failed to create agent"
+  },
+  "onboardingErrors": {
+    "failedToCreateCompany": "Failed to create company",
+    "failedToLoadOpenCode": "Failed to load OpenCode models.",
+    "failedToCreateAgent": "Failed to create agent",
+    "failedToUnsetAndRetry": "Failed to unset ANTHROPIC_API_KEY and retry.",
+    "failedToCreateTask": "Failed to create task"
+  },
+  "project": {
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "archiveHint": "Archive this project to hide it from the sidebar and project selectors.",
+    "unarchiveHint": "Unarchive this project to restore it in the sidebar and project selectors."
   },
   "projects": {
     "title": "Projects",

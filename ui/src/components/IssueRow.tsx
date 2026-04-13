@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Issue } from "@paperclipai/shared";
 import { Link } from "@/lib/router";
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import {
   createIssueDetailPath,
@@ -47,6 +48,7 @@ export function IssueRow({
   archiveDisabled,
   className,
 }: IssueRowProps) {
+  const { t } = useTranslation();
   const issuePathId = issue.identifier ?? issue.id;
   const identifier = issue.identifier ?? issue.id.slice(0, 8);
   const showUnreadSlot = unreadState !== null;
@@ -127,7 +129,7 @@ export function IssueRow({
                 "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
                 selected ? "hover:bg-muted/80" : "hover:bg-blue-500/20",
               )}
-              aria-label="Mark as read"
+              aria-label={t("issues.markAsRead")}
             >
               <span
                 className={cn(

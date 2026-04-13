@@ -24,6 +24,7 @@ import {
   type ReactNode,
 } from "react";
 import { Link, useLocation } from "@/lib/router";
+import { useTranslation } from "react-i18next";
 import type {
   Agent,
   FeedbackDataSharingPreference,
@@ -1192,6 +1193,7 @@ function IssueChatFeedbackButtons({
   termsUrl: string | null;
   onVote: (vote: FeedbackVoteValue, options?: { allowSharing?: boolean; reason?: string }) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [isSaving, setIsSaving] = useState(false);
   const [optimisticVote, setOptimisticVote] = useState<FeedbackVoteValue | null>(null);
   const [reasonOpen, setReasonOpen] = useState(false);
@@ -1300,7 +1302,7 @@ function IssueChatFeedbackButtons({
           <Textarea
             value={downvoteReason}
             onChange={(event) => setDownvoteReason(event.target.value)}
-            placeholder="Add a short note"
+            placeholder={t("issues.addShortNote")}
             className="min-h-20 resize-y bg-background text-sm"
             disabled={isSaving}
           />
@@ -1555,6 +1557,7 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
   composerDisabledReason = null,
   issueStatus,
 }, forwardedRef) {
+  const { t } = useTranslation();
   const api = useAui();
   const [body, setBody] = useState("");
   const [reopen, setReopen] = useState(issueStatus === "done" || issueStatus === "cancelled");
@@ -1677,7 +1680,7 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
         ref={editorRef}
         value={body}
         onChange={setBody}
-        placeholder="Reply"
+        placeholder={t("issues.replyPlaceholder")}
         mentions={mentions}
         onSubmit={handleSubmit}
         imageUploadHandler={onImageUpload}
